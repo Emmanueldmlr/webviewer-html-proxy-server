@@ -537,8 +537,9 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
   //   }
   // });
 
-  app.listen(8000);
-  logger.info(`Running on 8000`);
+  app.listen(8000, () => {
+    console.log(`Example app listening on port ${8000}`)
+  })
 // };
 
 // export { createServer };
