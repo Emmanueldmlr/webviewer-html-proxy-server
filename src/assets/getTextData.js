@@ -1,3 +1,5 @@
+const { debounceJS } = require("./debounceJS");
+
 const getTextData = (body) => {
   const traverseTextNode = (parentNode, struct, offsets, quads, str, linksArray) => {
     const range = document.createRange();
@@ -180,5 +182,3 @@ document.addEventListener('transitionend', () => {
   debounceSendDataOnTransition();
 });
 
-// e.source from eventListener "message" is the host page, window.top
-// use window.parent.postMessage() instead of e.source.postMessage() to communicate back to WV

@@ -1,10 +1,12 @@
-export const isURLAbsolute = (url: string): boolean => {
+ const isURLAbsolute = (url) => {
   return url.indexOf('://') > 0 || url.indexOf('//') === 0;
 };
 
-export const getCorrectHref = (url: string): string => {
+const getCorrectHref = (url) => {
   if (url.indexOf('//') === 0) {
     return `https:${url}`;
   }
   return url;
 };
+
+module.exports = {isURLAbsolute, getCorrectHref}

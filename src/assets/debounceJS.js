@@ -16,3 +16,5 @@ const debounceJS = (func, wait, leading) => {
     }
   };
 };
+
+module.exports = {debounceJS}

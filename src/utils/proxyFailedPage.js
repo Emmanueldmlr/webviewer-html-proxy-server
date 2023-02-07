@@ -1,4 +1,4 @@
-const getProxyFailedPage = (error?: string) => {
+const getProxyFailedPage = (error) => {
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -25,4 +25,4 @@ const getProxyFailedPage = (error?: string) => {
   `;
 };
 
-export { getProxyFailedPage };
+module.exports =  { getProxyFailedPage };

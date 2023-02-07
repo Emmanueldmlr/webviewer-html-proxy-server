@@ -1,16 +1,15 @@
-import https from 'https';
-import http from 'http';
-import type { ServerHostPortSSL } from './types';
+const https = require('https');
+const http  = require ('http');
 
-const getHostPortSSL = (url: string, allowHTTPProxy = false): ServerHostPortSSL => {
+const getHostPortSSL = (url, allowHTTPProxy = false) => {
   const {
     hostname,
     pathname,
     protocol,
     port,
   } = new URL(url);
-  let parsedPort: number;
-  let parsedSSL: typeof https | typeof http;
+  let parsedPort;
+  let parsedSSL;
   // proxied URLs will be prefixed with https if doesn't start with http(s)
   // safe to assume that if it's not protocol http then it should be https
   if (allowHTTPProxy && protocol === 'http:') {
@@ -28,4 +27,4 @@ const getHostPortSSL = (url: string, allowHTTPProxy = false): ServerHostPortSSL 
   };
 };
 
-export { getHostPortSSL };
+module.exports =  { getHostPortSSL };
