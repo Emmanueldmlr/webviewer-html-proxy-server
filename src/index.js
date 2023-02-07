@@ -547,3 +547,5 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
 // };
 
 // export { createServer };
+
+exports.app = app
