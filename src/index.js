@@ -133,54 +133,54 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
     const url = `${req.query.url}`;
     console.log(url)
     // ****** first check for malicious URLs
-    if (!isValidURL(url, ALLOW_HTTP_PROXY)) {
-      res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
-    } else {
-      // ****** second check for puppeteer being able to goto url
-      let browser;
-      try {
-        browser = await puppeteer.launch(puppeteerOptions);
-        const page = await browser.newPage();
-        // page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+    // if (!isValidURL(url, ALLOW_HTTP_PROXY)) {
+    //   res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
+    // } else {
+    //   // ****** second check for puppeteer being able to goto url
+    //   let browser;
+    //   try {
+    //     browser = await puppeteer.launch(puppeteerOptions);
+    //     const page = await browser.newPage();
+    //     // page.on('console', msg => console.log('PAGE LOG:', msg.text()));
 
-        const customHeaders = req.headers.customheaders;
-        if (customHeaders) {
-          const customHeadersObject = JSON.parse(`${customHeaders}`);
-          await page.setExtraHTTPHeaders(customHeadersObject);
-        }
+    //     const customHeaders = req.headers.customheaders;
+    //     if (customHeaders) {
+    //       const customHeadersObject = JSON.parse(`${customHeaders}`);
+    //       await page.setExtraHTTPHeaders(customHeadersObject);
+    //     }
 
-        const pageHTTPResponse = await page.goto(url, {
-          // use 'domcontentloaded' https://github.com/puppeteer/puppeteer/issues/1666
-          waitUntil: 'domcontentloaded', // defaults to load
-        });
-        // https://github.com/puppeteer/puppeteer/issues/2479 pageHTTPResponse could be null
-        const validUrl = pageHTTPResponse?.url() || url;
+    //     const pageHTTPResponse = await page.goto(url, {
+    //       // use 'domcontentloaded' https://github.com/puppeteer/puppeteer/issues/1666
+    //       waitUntil: 'domcontentloaded', // defaults to load
+    //     });
+    //     // https://github.com/puppeteer/puppeteer/issues/2479 pageHTTPResponse could be null
+    //     const validUrl = pageHTTPResponse?.url() || url;
 
-        // check again if puppeteer's validUrl will pass the test
-        if (validUrl !== url && !isValidURL(validUrl, ALLOW_HTTP_PROXY)) {
-          res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
-        } else {
-          logger.info(`********** NEW REQUEST: ${validUrl}`);
+    //     // check again if puppeteer's validUrl will pass the test
+    //     if (validUrl !== url && !isValidURL(validUrl, ALLOW_HTTP_PROXY)) {
+    //       res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
+    //     } else {
+    //       logger.info(`********** NEW REQUEST: ${validUrl}`);
 
-          // cookie will only be set when res is sent succesfully
-          const oneHour = 1000 * 60 * 60;
-          res.cookie('pdftron_proxy_sid', validUrl, { ...COOKIE_SETTING, maxAge: oneHour });
-          if (customHeaders) {
-            res.cookie('pdftron_proxy_headers', `${customHeaders}`, { ...COOKIE_SETTING, maxAge: oneHour });
-          }
-          res.status(200).send({ validUrl });
-        }
-      } catch (err) {
-        logger.error(`/pdftron-proxy ${url}`, err);
-        res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
-      } finally {
-        try {
-          await browser?.close();
-        } catch (err) {
-          logger.error(`/pdftron-proxy browser.close ${url}`, err);
-        }
-      }
-    }
+    //       // cookie will only be set when res is sent succesfully
+    //       const oneHour = 1000 * 60 * 60;
+    //       res.cookie('pdftron_proxy_sid', validUrl, { ...COOKIE_SETTING, maxAge: oneHour });
+    //       if (customHeaders) {
+    //         res.cookie('pdftron_proxy_headers', `${customHeaders}`, { ...COOKIE_SETTING, maxAge: oneHour });
+    //       }
+    //       res.status(200).send({ validUrl });
+    //     }
+    //   } catch (err) {
+    //     logger.error(`/pdftron-proxy ${url}`, err);
+    //     res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
+    //   } finally {
+    //     try {
+    //       await browser?.close();
+    //     } catch (err) {
+    //       logger.error(`/pdftron-proxy browser.close ${url}`, err);
+    //     }
+    //   }
+    // }
   });
 
   // need to be placed before app.use('/');
