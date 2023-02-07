@@ -74,7 +74,7 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
   const host = "https://mosaiq.herokuapp.com/";
   const COOKIE_SETTING = {}
   const ALLOW_HTTP_PROXY = true
-  const CORS_OPTIONS = { origin: `${host}:3000`, credentials: true }
+  const CORS_OPTIONS = { origin: `${host}`, credentials: true }
   const { align, colorize, combine, printf, timestamp } = format;
   const logger = createLogger({
     format: combine(
@@ -131,6 +131,7 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
   app.get('/pdftron-proxy', async (req, res) => {
     // this is the url retrieved from the input
     const url = `${req.query.url}`;
+    console.log(url)
     // ****** first check for malicious URLs
     if (!isValidURL(url, ALLOW_HTTP_PROXY)) {
       res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
@@ -244,7 +245,6 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
 
   app.get('/pdftron-link-preview', async (req, res) => {
     const linkToPreview = `${req.query.url}`;
-
     try {
       const page = await nodeFetch(linkToPreview);
       const virtualConsole = new VirtualConsole();
@@ -280,7 +280,6 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
 
       const metaSelectors = document.querySelectorAll('meta[name="description"], meta[property="og:description"]');
       const metaDescription = metaSelectors.length > 0 ? (metaSelectors[0].content || '') : '';
-
       res.status(200).send({ pageTitle, faviconUrl, metaDescription });
     } catch (err) {
       logger.error(`node-fetch link-preview ${linkToPreview}`, err);
