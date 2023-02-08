@@ -142,7 +142,10 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
       // ****** second check for puppeteer being able to goto url
       let browser;
       try {
-        browser = await puppeteer.launch(puppeteerOptions);
+        browser = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox','--disable-setuid-sandbox']
+        });
         const page = await browser.newPage();
         // page.on('console', msg => console.log('PAGE LOG:', msg.text()));
 
