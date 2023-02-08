@@ -71,7 +71,7 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
 //   COOKIE_SETTING = {},
 //   ALLOW_HTTP_PROXY = true
 // }) => {
-  const host = "https://pdf-tron.herokuapp.com";
+  const host = "https://mosaiq.herokuapp.com/";
   const port = process.env.PORT || 3000;
   const COOKIE_SETTING = {}
   const ALLOW_HTTP_PROXY = true
@@ -132,6 +132,8 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
   app.get('/pdftron-proxy', async (req, res) => {
     // this is the url retrieved from the input
     const url = `${req.query.url}`;
+    console.log("its getting hereejerjejejej")
+    console.log(req.query)
     console.log(url)
     // ****** first check for malicious URLs
     if (!isValidURL(url, ALLOW_HTTP_PROXY)) {
