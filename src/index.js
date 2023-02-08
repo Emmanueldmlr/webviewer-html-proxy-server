@@ -75,7 +75,7 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
   const port = process.env.PORT || 3000;
   const COOKIE_SETTING = {}
   const ALLOW_HTTP_PROXY = true
-  const CORS_OPTIONS = { origin: `${host}`, credentials: true }
+  const CORS_OPTIONS = { origin: `https://mosaiqlabsdemo.netlify.app/`, credentials: true }
   const { align, colorize, combine, printf, timestamp } = format;
   const logger = createLogger({
     format: combine(
