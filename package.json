@@ -7,7 +7,7 @@
   "license": "ISC",
   "types": "types/index.d.ts",
   "scripts": {
-    "start": "node index.js"
+    "start": "node ./src/index.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",

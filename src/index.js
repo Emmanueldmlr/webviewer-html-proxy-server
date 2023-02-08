@@ -72,6 +72,7 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
 //   ALLOW_HTTP_PROXY = true
 // }) => {
   const host = "https://mosaiq.herokuapp.com/";
+  const port = process.env.PORT || 3000;
   const COOKIE_SETTING = {}
   const ALLOW_HTTP_PROXY = true
   const CORS_OPTIONS = { origin: `${host}`, credentials: true }
@@ -128,168 +129,164 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
 
   const regexForVhValue = /(\d+?)vh/g;
 
-  app.get('/', (req, res) => {
-    res.send('Hello World!')
-  })
-
-  // app.get('/pdftron-proxy', async (req, res) => {
-  //   // this is the url retrieved from the input
-  //   const url = `${req.query.url}`;
-  //   console.log(url)
+  app.get('/pdftron-proxy', async (req, res) => {
+    // this is the url retrieved from the input
+    const url = `${req.query.url}`;
+    console.log(url)
     // ****** first check for malicious URLs
-    // if (!isValidURL(url, ALLOW_HTTP_PROXY)) {
-    //   res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
-    // } else {
-    //   // ****** second check for puppeteer being able to goto url
-    //   let browser;
-    //   try {
-    //     browser = await puppeteer.launch(puppeteerOptions);
-    //     const page = await browser.newPage();
-    //     // page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+    if (!isValidURL(url, ALLOW_HTTP_PROXY)) {
+      res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
+    } else {
+      // ****** second check for puppeteer being able to goto url
+      let browser;
+      try {
+        browser = await puppeteer.launch(puppeteerOptions);
+        const page = await browser.newPage();
+        // page.on('console', msg => console.log('PAGE LOG:', msg.text()));
 
-    //     const customHeaders = req.headers.customheaders;
-    //     if (customHeaders) {
-    //       const customHeadersObject = JSON.parse(`${customHeaders}`);
-    //       await page.setExtraHTTPHeaders(customHeadersObject);
-    //     }
+        const customHeaders = req.headers.customheaders;
+        if (customHeaders) {
+          const customHeadersObject = JSON.parse(`${customHeaders}`);
+          await page.setExtraHTTPHeaders(customHeadersObject);
+        }
 
-    //     const pageHTTPResponse = await page.goto(url, {
-    //       // use 'domcontentloaded' https://github.com/puppeteer/puppeteer/issues/1666
-    //       waitUntil: 'domcontentloaded', // defaults to load
-    //     });
-    //     // https://github.com/puppeteer/puppeteer/issues/2479 pageHTTPResponse could be null
-    //     const validUrl = pageHTTPResponse?.url() || url;
+        const pageHTTPResponse = await page.goto(url, {
+          // use 'domcontentloaded' https://github.com/puppeteer/puppeteer/issues/1666
+          waitUntil: 'domcontentloaded', // defaults to load
+        });
+        // https://github.com/puppeteer/puppeteer/issues/2479 pageHTTPResponse could be null
+        const validUrl = pageHTTPResponse?.url() || url;
 
-    //     // check again if puppeteer's validUrl will pass the test
-    //     if (validUrl !== url && !isValidURL(validUrl, ALLOW_HTTP_PROXY)) {
-    //       res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
-    //     } else {
-    //       logger.info(`********** NEW REQUEST: ${validUrl}`);
+        // check again if puppeteer's validUrl will pass the test
+        if (validUrl !== url && !isValidURL(validUrl, ALLOW_HTTP_PROXY)) {
+          res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
+        } else {
+          logger.info(`********** NEW REQUEST: ${validUrl}`);
 
-    //       // cookie will only be set when res is sent succesfully
-    //       const oneHour = 1000 * 60 * 60;
-    //       res.cookie('pdftron_proxy_sid', validUrl, { ...COOKIE_SETTING, maxAge: oneHour });
-    //       if (customHeaders) {
-    //         res.cookie('pdftron_proxy_headers', `${customHeaders}`, { ...COOKIE_SETTING, maxAge: oneHour });
-    //       }
-    //       res.status(200).send({ validUrl });
-    //     }
-    //   } catch (err) {
-    //     logger.error(`/pdftron-proxy ${url}`, err);
-    //     res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
-    //   } finally {
-    //     try {
-    //       await browser?.close();
-    //     } catch (err) {
-    //       logger.error(`/pdftron-proxy browser.close ${url}`, err);
-    //     }
-    //   }
-    // }
-  // });
+          // cookie will only be set when res is sent succesfully
+          const oneHour = 1000 * 60 * 60;
+          res.cookie('pdftron_proxy_sid', validUrl, { ...COOKIE_SETTING, maxAge: oneHour });
+          if (customHeaders) {
+            res.cookie('pdftron_proxy_headers', `${customHeaders}`, { ...COOKIE_SETTING, maxAge: oneHour });
+          }
+          res.status(200).send({ validUrl });
+        }
+      } catch (err) {
+        logger.error(`/pdftron-proxy ${url}`, err);
+        res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
+      } finally {
+        try {
+          await browser?.close();
+        } catch (err) {
+          logger.error(`/pdftron-proxy browser.close ${url}`, err);
+        }
+      }
+    }
+  });
 
   // need to be placed before app.use('/');
-  // app.get('/pdftron-download', async (req, res) => {
-  //   const url = `${req.query.url}`;
-  //   if (!isValidURL(url, ALLOW_HTTP_PROXY)) {
-  //     res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
-  //   } else {
-  //     logger.info(`********** DOWNLOAD: ${url}`);
-  //     let browser;
-  //     try {
-  //       browser = await puppeteer.launch(puppeteerOptions);
-  //       const page = await browser.newPage();
-  //       await page.goto(url, {
-  //         waitUntil: 'domcontentloaded'
-  //       });
-  //       await page.waitForTimeout(2000);
+  app.get('/pdftron-download', async (req, res) => {
+    const url = `${req.query.url}`;
+    if (!isValidURL(url, ALLOW_HTTP_PROXY)) {
+      res.status(400).send({ errorMessage: 'Please enter a valid URL and try again.' });
+    } else {
+      logger.info(`********** DOWNLOAD: ${url}`);
+      let browser;
+      try {
+        browser = await puppeteer.launch(puppeteerOptions);
+        const page = await browser.newPage();
+        await page.goto(url, {
+          waitUntil: 'domcontentloaded'
+        });
+        await page.waitForTimeout(2000);
 
-  //       // Get the "viewport" of the page, as reported by the page.
-  //       const pageDimensions = await page.evaluate(() => {
-  //         let sum = 0;
-  //         // for some web pages, <html> and <body> have height: 100%
-  //         // sum up the <body> children's height for an accurate page height
-  //         document.body.childNodes.forEach((el) => {
-  //           if (el.nodeType === Node.ELEMENT_NODE) {
-  //             const style = window.getComputedStyle(el);
-  //             // filter hidden/collapsible elements
-  //             if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0' || style.position === 'fixed' || style.position === 'absolute') {
-  //               return;
-  //             }
-  //             // some elements have undefined clientHeight
-  //             // favor scrollHeight since clientHeight does not include padding
-  //             if (!isNaN(el.scrollHeight) && !isNaN(el.clientHeight)) {
-  //               sum += (el.clientHeight > 0 ? (el.scrollHeight || el.clientHeight) : el.clientHeight);
-  //             }
-  //           }
-  //         });
-  //         const bodyHeight = document.body.scrollHeight || document.body.clientHeight || 0;
-  //         const pageHeight = bodyHeight > 0 && bodyHeight > sum ? bodyHeight : sum;
-  //         return {
-  //           width: document.body.scrollWidth || document.body.clientWidth || 1440,
-  //           // sum can be less than defaultViewport
-  //           height: pageHeight > 770 ? pageHeight : 770,
-  //         };
-  //       });
+        // Get the "viewport" of the page, as reported by the page.
+        const pageDimensions = await page.evaluate(() => {
+          let sum = 0;
+          // for some web pages, <html> and <body> have height: 100%
+          // sum up the <body> children's height for an accurate page height
+          document.body.childNodes.forEach((el) => {
+            if (el.nodeType === Node.ELEMENT_NODE) {
+              const style = window.getComputedStyle(el);
+              // filter hidden/collapsible elements
+              if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0' || style.position === 'fixed' || style.position === 'absolute') {
+                return;
+              }
+              // some elements have undefined clientHeight
+              // favor scrollHeight since clientHeight does not include padding
+              if (!isNaN(el.scrollHeight) && !isNaN(el.clientHeight)) {
+                sum += (el.clientHeight > 0 ? (el.scrollHeight || el.clientHeight) : el.clientHeight);
+              }
+            }
+          });
+          const bodyHeight = document.body.scrollHeight || document.body.clientHeight || 0;
+          const pageHeight = bodyHeight > 0 && bodyHeight > sum ? bodyHeight : sum;
+          return {
+            width: document.body.scrollWidth || document.body.clientWidth || 1440,
+            // sum can be less than defaultViewport
+            height: pageHeight > 770 ? pageHeight : 770,
+          };
+        });
 
-  //       const buffer = await page.screenshot({ type: 'png', fullPage: true });
-  //       res.setHeader('Cache-Control', ['no-cache', 'no-store', 'must-revalidate']);
-  //       res.status(200).send({ buffer, pageDimensions });
-  //     } catch (err) {
-  //       logger.error(`/pdftron-download ${url}`, err);
-  //       res.status(400).send({ errorMessage: 'Error taking screenshot from puppeteer' });
-  //     } finally {
-  //       try {
-  //         await browser?.close();
-  //       } catch (err) {
-  //         logger.error(`/pdftron-download browser.close ${url}`, err);
-  //       }
-  //     }
-  //   }
-  // });
+        const buffer = await page.screenshot({ type: 'png', fullPage: true });
+        res.setHeader('Cache-Control', ['no-cache', 'no-store', 'must-revalidate']);
+        res.status(200).send({ buffer, pageDimensions });
+      } catch (err) {
+        logger.error(`/pdftron-download ${url}`, err);
+        res.status(400).send({ errorMessage: 'Error taking screenshot from puppeteer' });
+      } finally {
+        try {
+          await browser?.close();
+        } catch (err) {
+          logger.error(`/pdftron-download browser.close ${url}`, err);
+        }
+      }
+    }
+  });
 
-  // app.get('/pdftron-link-preview', async (req, res) => {
-  //   const linkToPreview = `${req.query.url}`;
-  //   try {
-  //     const page = await nodeFetch(linkToPreview);
-  //     const virtualConsole = new VirtualConsole();
-  //     virtualConsole.on('error', () => {
-  //       // No-op to skip console errors. https://github.com/jsdom/jsdom/issues/2230
-  //     });
-  //     const virtualDOM = new JSDOM(await page.text(), { virtualConsole });
-  //     const { window } = virtualDOM;
-  //     const { document } = window;
+  app.get('/pdftron-link-preview', async (req, res) => {
+    const linkToPreview = `${req.query.url}`;
+    try {
+      const page = await nodeFetch(linkToPreview);
+      const virtualConsole = new VirtualConsole();
+      virtualConsole.on('error', () => {
+        // No-op to skip console errors. https://github.com/jsdom/jsdom/issues/2230
+      });
+      const virtualDOM = new JSDOM(await page.text(), { virtualConsole });
+      const { window } = virtualDOM;
+      const { document } = window;
 
-  //     const pageTitle = document.title;
+      const pageTitle = document.title;
 
-  //     const faviconValidURLs = [];
-  //     const faviconDataURLs = [];
-  //     const getAllFaviconURLs = (selectors) => {
-  //       document.querySelectorAll(selectors).forEach((el) => {
-  //         if (el.getAttribute('href')) {
-  //           // if favicon is a data URL, new URL() will return the same value
-  //           const { href: absoluteFaviconURL } = new URL(el.getAttribute('href'), linkToPreview);
-  //           // separate valid faviconURL and data faviconURL
-  //           if (isURLAbsolute(absoluteFaviconURL)) {
-  //             faviconValidURLs.push(absoluteFaviconURL);
-  //           } else {
-  //             faviconDataURLs.push(absoluteFaviconURL);
-  //           }
-  //         }
-  //       });
-  //     };
-  //     // prioritize [rel="icon"] over [rel="shortcut icon"];
-  //     getAllFaviconURLs('link[rel="icon"]');
-  //     getAllFaviconURLs('link[rel="shortcut icon"]');
-  //     const faviconUrl = faviconValidURLs[0] || faviconDataURLs[0] || '';
+      const faviconValidURLs = [];
+      const faviconDataURLs = [];
+      const getAllFaviconURLs = (selectors) => {
+        document.querySelectorAll(selectors).forEach((el) => {
+          if (el.getAttribute('href')) {
+            // if favicon is a data URL, new URL() will return the same value
+            const { href: absoluteFaviconURL } = new URL(el.getAttribute('href'), linkToPreview);
+            // separate valid faviconURL and data faviconURL
+            if (isURLAbsolute(absoluteFaviconURL)) {
+              faviconValidURLs.push(absoluteFaviconURL);
+            } else {
+              faviconDataURLs.push(absoluteFaviconURL);
+            }
+          }
+        });
+      };
+      // prioritize [rel="icon"] over [rel="shortcut icon"];
+      getAllFaviconURLs('link[rel="icon"]');
+      getAllFaviconURLs('link[rel="shortcut icon"]');
+      const faviconUrl = faviconValidURLs[0] || faviconDataURLs[0] || '';
 
-  //     const metaSelectors = document.querySelectorAll('meta[name="description"], meta[property="og:description"]');
-  //     const metaDescription = metaSelectors.length > 0 ? (metaSelectors[0].content || '') : '';
-  //     res.status(200).send({ pageTitle, faviconUrl, metaDescription });
-  //   } catch (err) {
-  //     logger.error(`node-fetch link-preview ${linkToPreview}`, err);
-  //     res.sendStatus(400);
-  //   }
-  // });
+      const metaSelectors = document.querySelectorAll('meta[name="description"], meta[property="og:description"]');
+      const metaDescription = metaSelectors.length > 0 ? (metaSelectors[0].content || '') : '';
+      res.status(200).send({ pageTitle, faviconUrl, metaDescription });
+    } catch (err) {
+      logger.error(`node-fetch link-preview ${linkToPreview}`, err);
+      res.sendStatus(400);
+    }
+  });
 
   // // TODO: detect when websites cannot be fetched
   // // // TAKEN FROM: https://stackoverflow.com/a/63602976
@@ -541,11 +538,9 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
   //   }
   // });
 
-  app.listen(8000, () => {
-    console.log(`Example app listening on port ${8000}`)
+  app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
   })
 // };
 
 // export { createServer };
-
-exports.app = app
