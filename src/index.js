@@ -72,10 +72,14 @@ const { isURLAbsolute } =  require('./utils/isURLAbsolute');
 //   ALLOW_HTTP_PROXY = true
 // }) => {
   const host = "https://mosaiq.herokuapp.com/";
+  const whitelist = [
+    "http://localhost:3000",
+    "https://mosaiqlabsdemo.netlify.app"
+  ];
   const port = process.env.PORT || 3000;
-  const COOKIE_SETTING = {}
-  const ALLOW_HTTP_PROXY = true
-  const CORS_OPTIONS = { origin: `https://mosaiqlabsdemo.netlify.app/`, credentials: true }
+  const COOKIE_SETTING = { sameSite: 'none', secure: true }
+  const ALLOW_HTTP_PROXY = false
+  const CORS_OPTIONS = { origin: whitelist, credentials: true }
   const { align, colorize, combine, printf, timestamp } = format;
   const logger = createLogger({
     format: combine(
